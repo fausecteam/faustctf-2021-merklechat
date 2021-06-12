@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta charset="utf-8">
+	<title>MerkleChat ™</title>
+	<link rel="stylesheet" href="/css/pure-min.css">
+	<style type="text/css">
+	  .home-menu {
+		  text-align: left;
+	  }
+	  .home-menu ul {
+		  float: right;
+	  }
+	  .home-menu {
+		  padding: 0.5em;
+		  box-shadow: 0 1px 1px rgba(0,0,0, 0.10);
+	  }
+	  .home-menu {
+		  background: #2d3e50;
+	  }
+	  .pure-menu.pure-menu-fixed {
+		  /* Fixed menus normally have a border at the bottom. */
+		  border-bottom: none;
+		  /* I need a higher z-index here because of the scroll-over effect. */
+		  z-index: 4;
+	  }
+
+	  .home-menu .pure-menu-heading {
+		  color: white;
+		  font-weight: 400;
+		  font-size: 120%;
+	  }
+
+	  .home-menu .pure-menu-selected a {
+		  color: white;
+	  }
+
+	  .home-menu a {
+		  color: #6FBEF3;
+	  }
+	  .home-menu li a:hover,
+	  .home-menu li a:focus {
+		  background: none;
+		  border: none;
+		  color: #AECFE5;
+	  }
+	  #layout, #nav, #list, #main {
+		  margin: 0;
+		  padding: 0;
+		  margin-top: 57px;
+	  }
+	  .primary-button,
+	  .secondary-button {
+		  -webkit-box-shadow: none;
+		  -moz-box-shadow: none;
+		  box-shadow: none;
+		  border-radius: 20px;
+	  }
+	  .primary-button {
+		  color: #fff;
+		  background: #1b98f8;
+		  margin: 1em 0;
+	  }
+	  .secondary-button {
+		  background: #1b98f8;
+		  border: 1px solid #666;
+		  color: #ddd;
+		  padding: 0.5em 2em;
+		  font-size: 80%;
+	  }
+	  .chat-item {
+		  padding: 0.9em 1em;
+		  border-bottom: 1px solid #ddd;
+		  border-left: 6px solid transparent;
+	  }
+	  .chat-avatar {
+		  border-radius: 3px;
+		  margin-right: 0.5em;
+	  }
+	  .chat-name,
+	  .chat-subject {
+		  margin: 0;
+	  }
+	  .chat-name {
+		  text-transform: uppercase;
+		  color: #999;
+	  }
+	  .chat-desc {
+		  font-size: 80%;
+		  margin: 0.4em 0;
+	  }
+
+	  .chat-item-selected {
+		  background: #eee;
+	  }
+	  .chat-item-unread {
+		  border-left: 6px solid #1b98f8;
+	  }
+	  .chat-content-header, .chat-content-body, .chat-content-footer {
+		  padding: 1em 2em;
+	  }
+	  .chat-content-header {
+		  border-bottom: 1px solid #ddd;
+	  }
+
+	  .chat-content-title {
+		  margin: 0.5em 0 0;
+	  }
+	  .chat-content-subtitle {
+		  font-size: 1em;
+		  margin: 0;
+		  font-weight: normal;
+	  }
+	  .chat-content-subtitle span {
+		  color: #999;
+	  }
+	  .chat-content-controls {
+		  margin-top: 2em;
+		  text-align: right;
+	  }
+	  .chat-content-controls .secondary-button {
+		  margin-bottom: 0.3em;
+	  }
+
+	  .chat-avatar {
+		  width: 40px;
+		  height: 40px;
+	  }
+	  #layout {
+		  padding-left:350px;
+		  position: relative;
+	  }
+	  #list {
+
+		  position: fixed;
+		  top: 0;
+		  bottom: 0;
+		  overflow: auto;
+	  }
+	  #list {
+		  margin-left: -350px;
+		  width: 100%;
+		  height: 33%;
+		  border-bottom: 1px solid #ddd;
+	  }
+
+	  #main {
+		  position: fixed;
+		  top: 33%;
+		  right: 0;
+		  bottom: 0;
+		  left: 150px;
+		  overflow: auto;
+		  /* so that its not 100% */
+		  width: auto;
+	  }
+	  #list {
+		  margin-left: -350px;
+		  width:350px;
+		  height: 100%;
+		  border-right: 1px solid #ddd;
+	  }
+	  #main {
+		  position: static;
+		  margin: 0;
+		  padding: 0;
+		  margin-bottom:50px;
+	  }
+	  #input {
+		  position: fixed;
+		  bottom: 0;
+		  left: 370px;
+		  right:0;
+		  padding:5px;
+	  }
+	  #modal {
+		  display: none;
+		  position: fixed;
+		  width: 650px;
+		  height: 300px;
+		  top:50%;
+		  left: 50%;
+		  margin-left: -325px;
+		  margin-top: -150px;
+		  border: 5px solid #2d3e50;
+		  border-radius: 20px;
+		  background-color: #fff;
+	  }
+	  #modal h1 {
+		  text-align:center;
+		  background-color: #2d3e50;
+		  color: white;
+		  padding-bottom: 5px;
+		  margin-top: 0px;
+	  }
+	</style>
+  </head>
+  <body>
+	<div class="header">
+	  <div class="home-menu pure-menu pure-menu-horizontal pure-menu-fixed">
+		<a class="pure-menu-heading" href="">MerkleChat ™</a>
+
+		<ul class="pure-menu-list">
+		  <!-- <li class="pure-menu-item pure-menu-selected"><a href="#" class="pure-menu-link">Home</a></li> -->
+		  <!-- <li class="pure-menu-item"><a href="#" class="pure-menu-link">Tour</a></li> -->
+		  <!-- <li class="pure-menu-item"><a href="#" class="pure-menu-link">Sign Up</a></li> -->
+		</ul>
+	  </div>
+	</div>
+	<div id="layout" class="content pure-g">
+	</div>
+	<div id="modal"></div>
+	<template id="chat-item">
+	  <div class="chat-item pure-g">
+		<div class="pure-u">
+		  <img width="64" height="64" alt="&#x27;s avatar" class="chat-avatar" src="">
+		</div>
+		<div class="pure-u-3-4">
+		  <h4 class="chat-subject"></h4>
+		  <p class="chat-desc">
+		  </p>
+		</div>
+	  </div>
+	</template>
+	<template id="chat-content">
+	  <div class="chat-content">
+		<div class="chat-content-header pure-g">
+		  <div class="pure-u-1">
+			<h1 class="chat-content-title"></h1>
+		  </div>
+		</div>
+		<div class="chat-content-body">
+		</div>
+		<div id="input" class="pure-u">
+		  <form class="pure-form">
+			<fieldset>
+			  <button type="submit" class="pure-button pure-button-primary">Send</button>
+			  <div class="pure-u-3-4">
+				<input type="text" class="pure-input-1" placeholder="Your Message" />
+			  </div>
+			</fieldset>
+		  </form>
+		</div>
+	  </div>
+	</template>
+	<template id="template-register-dialog">
+	  <div>
+		<h1>Register</h1>
+		<div class="pure-g">
+		  <div class="pure-u-3-4">
+			<form class="pure-form pure-form-aligned">
+			  <fieldset>
+				<div class="pure-control-group">
+				  <label for="register-username">Username</label>
+				  <input type="text" id="register-username" placeholder="Username" />
+				</div>
+				<div class="pure-control-group">
+				  <label for="register-uuid">UUID</label>
+				  <input type="text" id="register-uuid" placeholder="" disabled="" />
+				</div>
+				<div class="pure-control-group">
+				  <label for="register-avatar">Avatar</label>
+				  <select id="register-avatar" class="pure-input-1-2"></select>
+				</div>
+				<div class="pure-controls">
+				  <button type="submit" class="pure-button pure-button-primary">Register</button>
+				</div>
+			  </fieldset>
+			</form>
+		  </div>
+		  <div class="pure-u-1-4">
+			<img height="150px" src="/img/alice.svg" />
+		  </div>
+		</div>
+	  </div>
+	</template>
+	<template id="template-addcontact-dialog">
+	  <div>
+		<h1>Add Contact</h1>
+		<form class="pure-form pure-form-aligned">
+		  <fieldset>
+			<div class="pure-control-group">
+			  <label for="addcontact-uuid">UUID</label>
+			  <input type="text" id="addcontact-uuid" placeholder="" />
+			</div>
+			<div class="pure-controls">
+			  <button type="submit" class="pure-button pure-button-primary">Add</button>
+			</div>
+		  </fieldset>
+		</form>
+	  </div>
+	</template>
+
+	<script type="module">
+	  import init, { generate_uuid, generate_keys, encrypt_message, fake_encrypt_message, decrypt_message } from "./wasm/merklewasm.js";
+
+	  const chatLayoutContainer   = document.getElementById("layout");
+	  const chatItemContainer     = document.createElement("div");
+	  const chatContentContainer  = document.createElement("div");
+	  const chatItemTemplate      = document.getElementById("chat-item");
+	  const chatContentTemplate   = document.getElementById("chat-content");
+
+	  const modalWidget           = document.getElementById("modal");
+	  const modalDialogRegister   = document.getElementById("template-register-dialog");
+	  const modalDialogAddContact = document.getElementById("template-addcontact-dialog");
+
+	  chatItemContainer.id = "list";
+	  chatContentContainer.id = "main";
+
+	  chatItemContainer.classList.add("pure-u-1");
+	  chatContentContainer.classList.add("pure-u-1");
+
+	  chatLayoutContainer.appendChild(chatItemContainer);
+	  chatLayoutContainer.appendChild(chatContentContainer);
+
+	  let chatMap = new Map();
+
+	  class Chat {
+		  constructor(uuid) {
+			  this.uuid = uuid;
+			  this.messages = new Set();
+			  this.isActive = false;
+
+			  const cloneI = chatItemTemplate.content.firstElementChild.cloneNode(true);
+			  cloneI.setAttribute("data-uuid", uuid);
+
+			  this.listElement = cloneI
+
+			  const thisObject = this;
+			  cloneI.addEventListener("click", function() {thisObject.active(true)});
+			  chatItemContainer.appendChild(cloneI);
+			  chatMap.set(uuid, this);
+
+			  const cloneC = chatContentTemplate.content.firstElementChild.cloneNode(true);
+			  cloneC.setAttribute("data-uuid", uuid);
+			  this.contentElement = cloneC;
+
+			  this.avatar = cloneI.getElementsByClassName("chat-avatar")[0];
+			  this.subject = cloneI.getElementsByClassName("chat-subject")[0];
+			  this.title = cloneC.getElementsByClassName("chat-content-title")[0];
+
+			  this.getAccount(uuid);
+
+			  const form = cloneC.getElementsByTagName("form")[0];
+			  const input = form.getElementsByTagName("input")[0];
+			  const chat = this;
+
+			  form.addEventListener('submit', function(event) {
+				  event.preventDefault();
+				  let msg = encrypt_message(input.value, chat.account.pubkeys);
+				  msg.to = chat.uuid;
+				  msg.from = window.account.uuid;
+
+				  var xmlhttp = new XMLHttpRequest();
+				  xmlhttp.open("POST", `http://${location.hostname}:3030/sendmessage`, true);
+				  xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+				  xmlhttp.send(JSON.stringify(msg));
+
+				  input.value = "";
+			  });
+
+		  }
+
+
+		  getAccount(uuid) {
+			  const chat = this;
+			  var xmlhttp = new XMLHttpRequest();
+			  xmlhttp.open("GET", `http://${location.hostname}:3030/getaccount/${uuid}`, true);
+			  xmlhttp.onreadystatechange = function() {
+				  if (this.readyState == 4 && this.status == 200) {
+					  const response = chat.account = JSON.parse(this.responseText);
+					  chat.avatar.alt = response.username + chat.avatar.alt;
+					  chat.avatar.src = response.avatar;
+					  chat.subject.innerText = chat.title.innerText = response.username;
+				  }
+			  }
+			  xmlhttp.send()
+		  }
+
+
+		  active(dir) {
+			  if (dir) {
+				  chatMap.forEach(function(elt) {elt.active(false);});
+				  this.listElement.classList.add("chat-item-selected");
+				  this.listElement.classList.remove("chat-item-unread");
+
+				  chatContentContainer.innerHTML = "";
+				  chatContentContainer.appendChild(this.contentElement);
+			  } else {
+				  this.listElement.classList.remove("chat-item-selected");
+			  }
+			  this.isActive = dir;
+		  }
+
+
+		  newMessage(ctxt) {
+			  if (!this.messages.has(JSON.stringify(ctxt))) {
+				  this.messages.add(JSON.stringify(ctxt));
+
+				  let msg = decrypt_message(ctxt);
+
+				  if (!this.isActive) {
+					  this.listElement.classList.add("chat-item-unread");
+				  }
+
+				  const newpar = document.createElement("p");
+				  newpar.innerText = msg;
+				  this.contentElement.getElementsByClassName("chat-content-body")[0].appendChild(newpar);
+
+				  if (msg.length > 80) {
+					  msg = msg.slice(0, 75) + " ...";
+				  }
+				  this.listElement.getElementsByClassName("chat-desc")[0].innerText = msg;
+			  }
+		  }
+	  }
+
+
+
+	  class Account {
+		  constructor() {
+			  this.uuid = window.localStorage.getItem("uuid");
+
+			  if (this.uuid == null) {
+				  const keys = generate_keys();
+				  const uuid = this.uuid = generate_uuid();
+
+				  const dialog = modalDialogRegister.content.firstElementChild.cloneNode(true);
+
+				  modal.innerHTML = "";
+				  modal.appendChild(dialog);
+
+				  const form   = modal.getElementsByTagName("form")[0];
+				  const avatar = document.getElementById("register-avatar");
+				  const img    = modal.getElementsByTagName("img")[0];
+				  const button = modal.getElementsByTagName("button")[0];
+
+				  document.getElementById("register-uuid").value = uuid;
+
+				  avatar.addEventListener('change', function () {
+					  img.src = `/img/${avatar.value}.svg`;
+				  });
+
+				  ["Alice", "Bob", "Devil", "Graduate", "Guard", "Duck", "Judge", "Santa", "Sailor", "Pilot", "Police"].forEach(
+					  function (each) {
+						  let option = document.createElement("option");
+						  option.innerHTML = each;
+						  option.value = each.toLowerCase();
+						  avatar.appendChild(option);
+					  });
+
+				  modal.style.display = "block";
+				  this.addContact();
+
+				  form.addEventListener('submit', function(event) {
+					  button.disabled = true;
+					  button.classList.add("pure-disabled");
+					  const username = document.getElementById("register-username").value;
+					  var xmlhttp = new XMLHttpRequest();
+					  xmlhttp.open("POST", `http://${location.hostname}:3030/register`, true);
+					  xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+					  xmlhttp.onreadystatechange = function() {
+						  if (this.readyState == 4 && this.status == 200) {
+							  //new Chat("00000000-0000-0000-0000-000000000000");
+							  new Chat(uuid);
+							  modal.style.display = "none";
+							  window.localStorage.setItem("uuid", uuid);
+						  }
+					  }
+					  xmlhttp.send(JSON.stringify({'username': username, 'uuid': uuid, 'avatar': img.src, 'pubkeys': keys}))
+
+					  event.preventDefault();
+				  });
+
+			  } else {
+				  this.addContact();
+				  //new Chat("00000000-0000-0000-0000-000000000000");
+				  new Chat(this.uuid);
+			  }
+
+
+			  this.update();
+		  }
+
+
+		  addContact() {
+			  const clone = chatItemTemplate.content.firstElementChild.cloneNode(true);
+			  const subject = clone.getElementsByClassName("chat-subject")[0];
+			  subject.innerText = "Add Contact";
+
+			  const img = clone.getElementsByTagName("img")[0].parentNode;
+			  img.parentNode.removeChild(img);
+
+
+			  const account = this;
+			  clone.addEventListener("click", function() {
+				  const dialog = modalDialogAddContact.content.firstElementChild.cloneNode(true);
+
+				  modal.innerText = "";
+				  modal.appendChild(dialog);
+
+				  const form   = modal.getElementsByTagName("form")[0];
+				  const button = modal.getElementsByTagName("button")[0];
+
+				  form.addEventListener('submit', function(event) {
+					  event.preventDefault();
+					  new Chat(document.getElementById("addcontact-uuid").value);
+					  modal.style.display = "none";
+				  });
+
+				  modal.style.display = "block";
+
+
+			  });
+			  chatItemContainer.appendChild(clone);
+
+		  }
+
+
+		  getUuid() {
+			  return this.uuid;
+		  }
+
+		  update() {
+			  const chat = this;
+			  setTimeout(function() {chat.update()} , 30000);
+
+			  var xmlhttp = new XMLHttpRequest();
+			  xmlhttp.open("GET", `http://${location.hostname}:3030/getmessages/${this.uuid}`, true);
+			  xmlhttp.onreadystatechange = function() {
+				  if (this.readyState == 4 && this.status == 200) {
+					  const response = JSON.parse(this.responseText);
+					  response.forEach(function(each){
+						  let chat = chatMap.get(each.from);
+						  if (!chat) {
+							  chat = new Chat(each.from);
+						  }
+						  chat.newMessage(each);
+					  });
+				  }
+			  }
+			  xmlhttp.send()
+
+		  }
+	  }
+
+
+	  async function run() {
+		  await init();
+		  window.account = new Account()
+	  }
+	  run();
+	</script>
+  </body>
+</html>

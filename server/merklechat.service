@@ -1,0 +1,17 @@
+[Unit]
+Description=FAUST CTF merklechat service
+Requires=postgresql@13-main.service
+After=postgresql@13-main.service
+
+[Service]
+ExecStartPre=-+/usr/sbin/runuser -u postgres -- /usr/bin/createuser merklechat
+ExecStartPre=-+/usr/sbin/runuser -u postgres -- /usr/bin/createdb -O merklechat merklechat
+ExecStart=/srv/merklechat/merkleserver
+Environment=RUST_LOG=server::requests
+WorkingDirectory=/srv/merklechat
+User=merklechat
+LimitNPROC=100
+LimitCPU=60
+
+[Install]
+WantedBy = multi-user.target

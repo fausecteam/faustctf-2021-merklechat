@@ -1,0 +1,31 @@
+# Human-readable name of the service
+name: MerkleChat
+# Name of the service for usage in paths, usernames etc.: Should only consist of lowercase alphanumeric
+# characters, must be identical to the (URL) project name of the GitLab repo
+slug: merklechat
+authors:
+  - Christoph Egger <egger@cs.fau.de>
+
+install:
+  debian_packages:
+    - nginx
+    - postgresql
+  # These will be run on the Vulnbox after extracting "dist_root" (from the build) to the root file system,
+  # installing Debian packages and creating the service user
+  postinst_commands:
+    - systemctl enable merklechat.service
+  # Whether to insert a firewall rule not allowing the service user to establish outgoing network connections
+  # This should generally be enabled, except for services which need outgoing connections
+  prevent_outgoing_connections: True
+
+checker:
+  script_path: checker/merklechat.py
+  # Upper bound of how long the Checker Script takes to run (for a single team)
+  # Used for scheduling checks within a tick, executions taking longer *may* get terminated
+  max_duration: 60
+  debian_packages:
+    - chromium-driver
+    - chromium-sandbox
+    - python3-selenium
+    - python3-sh
+  pip_packages: []

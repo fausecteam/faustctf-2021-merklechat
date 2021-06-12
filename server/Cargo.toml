@@ -1,0 +1,18 @@
+[package]
+name = "merkleserver"
+version = "0.1.0"
+authors = ["Your Name <you@example.com>"]
+edition = "2018"
+
+[dependencies]
+aes-soft = "0.6"
+futures = ""
+mobc = "0.5"
+mobc-postgres = { version = "0.5", features = ["with-uuid-0_8", "with-bit-vec-0_6"] }
+pretty_env_logger = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "0.2", features = ["full"] }
+tokio-postgres = {version = "0.5", features = ["runtime", "with-uuid-0_8", "with-bit-vec-0_6"]}
+warp = "0.2"
+uuid = { version = "0.8", features = ["serde", "v4"] }
